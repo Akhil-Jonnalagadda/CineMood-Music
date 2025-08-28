@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood-Based Music Recommender</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1500&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+        .container {
+            background: rgba(0,0,0,0.6);
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+        .song-list {
+            margin: 20px 0;
+        }
+        .song-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .song-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .player {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mood-Based Music Recommender</h1>
+        <label for="mood">Select your mood:</label>
+        <select id="mood">
+            <option value="happy">Happy</option>
+            <option value="sad">Sad</option>
+            <option value="energetic">Energetic</option>
+            <option value="relaxing">Relaxed</option>
+        </select>
+        <button onclick="getSongs()">Get Songs</button>
+        <div class="song-list" id="songList"></div>
+        <div class="player" id="player"></div>
+    </div>
+    <script>
+        async function getSongs() {
+            const mood = document.getElementById('mood').value;
+            document.getElementById('songList').innerHTML = '<em>Loading...</em>';
+            document.getElementById('player').innerHTML = '';
+            // Use a public CORS proxy to access Deezer API
+            const proxyUrl = 'https://corsproxy.io/?';
+            const deezerUrl = `https://api.deezer.com/search?q=${mood}`;
+            const res = await fetch(proxyUrl + encodeURIComponent(deezerUrl));
+            const data = await res.json();
+            let html = '';
+            if (data.data && data.data.length > 0) {
+                data.data.slice(0, 5).forEach((song, idx) => {
+                    html += `<div class='song-item' onclick='playSong("${song.preview}", "${song.title}", "${song.artist.name}")'>${idx+1}. ${song.title} <span style='color:#ffd700'>by</span> ${song.artist.name}</div>`;
+                });
+            } else {
+                html = '<em>No songs found for this mood.</em>';
+            }
+            document.getElementById('songList').innerHTML = html;
+        }
+        function playSong(previewUrl, title, artist) {
+            document.getElementById('player').innerHTML = `
+                <div style='text-align:center;'>
+                    <h2>Now Playing</h2>
+                    <p style='font-size:18px;'>${title} <span style='color:#ffd700'>by</span> ${artist}</p>
+                    <audio id='audioPlayer' controls autoplay src='${previewUrl}' style='width:100%;'></audio>
+                    <div id='audioError' style='color:#ff8080; margin-top:10px;'></div>
+                </div>
+            `;
+            // Add fallback: if audio fails, open in new tab
+            setTimeout(() => {
+                const audio = document.getElementById('audioPlayer');
+                if (audio) {
+                    audio.onerror = function() {
+                        document.getElementById('audioError').innerHTML = 'Audio preview failed. <a href="' + previewUrl + '" target="_blank" style="color:#ffd700">Click here to play in a new tab.</a>';
+                    };
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
