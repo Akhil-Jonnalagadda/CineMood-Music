@@ -19,6 +19,8 @@ A Java Swing application that recommends music based on your selected mood and l
 - The app uses the Deezer API to fetch songs matching your selected mood.
 - When you select a mood or enter a custom mood and click "Get Songs", the app displays a list of songs.
 - Select a song and use the buttons to play, favorite, share, or view details.
+- <img width="1919" height="1025" alt="image" src="https://github.com/user-attachments/assets/b18e5c1f-682d-406b-b856-97d8d076338c" />
+
 
 ## How to Use
 1. **Requirements:**
